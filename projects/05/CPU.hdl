@@ -40,4 +40,45 @@ CHIP CPU {
 
     PARTS:
     // Put your code here:
+    // instruction is either of type A or C
+    Not(in=instruction[15], out=ainst); 
+    Not(in=ainst, out=cinst);
+    Or(a=ainst,b=instruction[5],out=loada);
+
+    Mux16(a=ALUoutM, b=instruction, sel=ainst, out=ain);
+    ARegister(in=ain, load=loada, out=aout, out[0..14]=addressM);
+
+    // register d has to be loaded if instruction is of type c
+    // and the alu computation is stored within register d.
+    And(a=cinst, b=instruction[4], out=loadd);
+    DRegister(in=ALUoutM, load=loadd, out=dout);
+
+    // select either the value in A or M=Memory[A]
+    And(a=instruction[12], b=cinst, out=aORm);
+    Mux16(a=aout, b=inM, sel=aORm, out=AMout);
+
+    // write to M? 
+    And(a=cinst, b=instruction[3], out=writeM);
+
+    // ALU computation
+    ALU(x=dout, y=AMout, zx=instruction[11], nx=instruction[10], 
+        zy=instruction[9],ny=instruction[8],f=instruction[7],no=instruction[6],
+        out=ALUoutM, out=outM, zr=zr, ng=ng);
+
+    And(a=cinst, b=instruction[0], out=jgt);
+    And(a=cinst, b=instruction[1], out=jeq);
+    And(a=cinst, b=instruction[2], out=jlt);
+
+    Not(in=ng, out=ALUoutpos); // ALU output >= 0
+    Not(in=zr, out=ALUoutnonzero); // ALU output != 0
+    And(a=ALUoutpos, b=ALUoutnonzero, out=ALUoutgtzero); // ALU output > 0
+
+    And(a=jgt, b=ALUoutgtzero, out=jmpjgt);
+    And(a=jeq, b=zr, out=jmpjeq);
+    And(a=jlt, b=ng, out=jmpjlt);
+
+    Or(a=jmpjgt, b=jmpjeq, out=jmp1);
+    Or(a=jmp1, b=jmpjlt, out=jmpload);
+
+    PC(in=aout, reset=reset, inc=true, load=jmpload, out[0..14]=pc);
 }
