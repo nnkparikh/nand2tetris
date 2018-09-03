@@ -63,14 +63,30 @@ class Parser:
 		return self.commandType
 
 	def symbol(self):
-		pass
+		cmd = self.current_cmd
+		if (cmd != Parser.A_CMD and cmd != Parser.L_CMD):
+			print("symbol only defined for A_CMD OR L_CMD.")
+			return None
+		return self.symbol
 
 	def dest(self):
-		pass
+		cmd = self.current_cmd
+		if (cmd != Parser.C_CMD):
+			print("dest field only defined for C_CMD.")
+			return None
+		return self.dest
 
 	def comp(self):
-		pass
+		cmd = self.current_cmd
+		if (cmd != Parser.C_CMD):
+			print("comp field only defined for C_CMD.")
+			return None
+		return self.comp
 
 	def jump(self):
-		pass
+		cmd = self.current_cmd
+		if (cmd != Parser.C_CMD):
+			print("jump field only defined for C_CMD.")
+			return None
+		return self.jump
 
