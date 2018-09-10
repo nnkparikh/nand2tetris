@@ -11,7 +11,8 @@ class A_cmd:
 		return symbol
 
 	def binaryCode(self):
-		return format(int(self.evalSymbol(self._symbol)), 'b')
+		binaryCode = format(int(self.evalSymbol(self._symbol)), 'b')
+		return "0" + binaryCode.zfill(15)
 
 class L_cmd:
 	def __init__(self, cmd):
