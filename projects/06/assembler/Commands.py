@@ -7,8 +7,11 @@ class A_cmd:
 	def symbol(self):
 		return self._symbol
 
+	def evalSymbol(self, symbol):
+		return symbol
+
 	def binaryCode(self):
-		pass
+		return format(int(self.evalSymbol(self._symbol)), 'b')
 
 class L_cmd:
 	def __init__(self, cmd):
@@ -29,7 +32,23 @@ class C_cmd:
 		self._comp = None
 		self._jump = None
 		self._setFields()
-		self._compCodes = {}
+		self._compCodes = {
+		"0":"0101010", "1":"0111111", "-1":"0111010", "D":"0001100",
+		"A":"0110000", "!D":"0001101", "!A":"0110001", "-D":"0001111",
+		"-A":"0110011", "D+1":"0011111", "A+1":"0110111", "D-1":"0001110", 
+		"A-1":"0110010", "D+A":"0000010", "D-A":"0010011", "A-D":"0000111", 
+		"D&A":"0000000", "D|A":"0010101", "M":"1110000", "!M":"1110001", 
+		"-M":"1110011", "M+1":"1110111", "M-1":"1110010","D+M":"1000010",
+		"D-M":"1010011","M-D":"1000111", "D&M":"1000000","D|M":"1010101"
+		}
+		self._destCodes = {
+		"null":"000","M":"001","D":"010","MD":"011",
+		"A":"100","AM":"101","AD":"110","AMD":"111"
+		}
+		self._jumpCodes = {
+		"null":"000","JGT":"001","JEQ":"010","JGE":"011",
+		"JLT":"100","JNE":"101","JLE":"110","JMP":"111"
+		}
 
 	def _setFields(self):
 		# set dest field
@@ -60,15 +79,18 @@ class C_cmd:
 	def jump(self):
 		return self._jump
 
-	def binaryCode(self, field):
-		binary = None
-		if (field == "dest" and self._dest != None):
-			binary = self._compCodes[self._dest]
-		elif (field == "comp" and self._comp != None):
-			binary = self._compCodes[self._comp]
-		elif (field == "jump" and self._jump != None):
-			binary = self._compCodes[self._jump]
-		else: 
-			print("Invalid field.")
-			
-		return binary
+	def binaryCode(self, field=""):
+		binary = ["0000000","000","000"]
+		if (self._comp != None):
+			binary[0] = self._compCodes[self._comp]
+		if (self._dest != None):
+			binary[1] = self._destCodes[self._dest]
+		if (self._jump != None):
+			binary[2] = self._jumpCodes[self._jump]
+
+		if (field == ""): return "111" + "".join(binary)
+		elif (field == "comp"): return binary[0]
+		elif (field == "dest"): return binary[1]
+		elif (field == "jump"): return binary[2]
+		print("Invalid field.")
+		return ""
